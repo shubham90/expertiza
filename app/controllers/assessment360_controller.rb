@@ -177,20 +177,23 @@ class Assessment360Controller < ApplicationController
         overall_meta_average = 0
         overall_meta_count = 0 
 
-        @class_overall_average[@class_averge_sym][@meta_review_sym] = '-NA-'
-        @class_overall_average[@class_averge_sym][@teammate_review_sym] = '-NA-'
+        @class_overall_average[@class_averge_sym][@meta_review_sym] = ''
+        @class_overall_average[@class_averge_sym][@teammate_review_sym] = ''
 
+     #   student = @students.where(user_id: 5404)
+     #   assignment = @assignments.where(name: "New problems A")
+     #   assignment_participant = assignment.participants.find_by_user_id(student.user_id) 
         @students.each do |student| 
             teammate_aggregate = 0
             meta_aggregate = 0
             teammate_count = 0
             meta_count = 0 
             @assignments.each do |assignment| 
-                
-                @meta_review[student.fullname.to_s][assignment.name.to_s] = '-NA-'
-                @teammate_review[student.fullname.to_s][assignment.name.to_s] = '-NA-'
-                @student_overall_average[student.fullname.to_s][@meta_review_sym] = '-NA-'
-                @student_overall_average[student.fullname.to_s][@teammate_review_sym] = '-NA-'
+                puts student.name + '  ' + assignment.name
+                @meta_review[student.fullname.to_s][assignment.name.to_s] = ''
+                @teammate_review[student.fullname.to_s][assignment.name.to_s] = ''
+                @student_overall_average[student.fullname.to_s][@meta_review_sym] = ''
+                @student_overall_average[student.fullname.to_s][@teammate_review_sym] = ''
 
                 assignment_participant = assignment.participants.find_by_user_id(student.user_id) 
                 if !assignment_participant.nil? 
@@ -200,10 +203,10 @@ class Assessment360Controller < ApplicationController
                     teammate_average = 0 
                     if teammate_reviews.count > 0
                         teammate_reviews.each do |teammate_review| 
-                            teammate_average = teammate_average + teammate_review.average_score 
+                            teammate_average = teammate_average + teammate_review.get_average_score 
                         end 
                         teammate_average = (teammate_average.to_f/teammate_reviews.count.to_f).to_f.round() 
-                        @teammate_review[student.fullname.to_s][assignment.name.to_s] = teammate_average
+                        @teammate_review[student.fullname.to_s][assignment.name.to_s] = teammate_average.to_s + '%'
                         teammate_count_hash[assignment.name.to_s] = teammate_count_hash[assignment.name.to_s] + 1 
                     end 
 
@@ -215,10 +218,10 @@ class Assessment360Controller < ApplicationController
                     meta_average = 0.to_i 
                     if meta_reviews.count > 0
                         meta_reviews.each do |meta_review| 
-                            meta_average = meta_average + meta_review.average_score 
+                            meta_average = meta_average + meta_review.get_average_score 
                         end
                         meta_average = (meta_average.to_f/meta_reviews.count.to_f).to_f.round() 
-                        @meta_review[student.fullname.to_s][assignment.name.to_s] = meta_average
+                        @meta_review[student.fullname.to_s][assignment.name.to_s] = meta_average.to_s+'%'
                         meta_count_hash[assignment.name.to_s] = meta_count_hash[assignment.name.to_s] + 1 
                     end 
 
@@ -233,32 +236,34 @@ class Assessment360Controller < ApplicationController
             end 
 
             if meta_count.to_i > 0 
-                @student_overall_average[student.fullname.to_s][:meta_review] = (meta_aggregate/meta_count).to_f.round() 
+                @student_overall_average[student.fullname.to_s][:meta_review] = (meta_aggregate/meta_count).to_f.round().to_s+'%'
                 overall_meta_average =  overall_meta_average + (meta_aggregate/meta_count)
-                overall_meta_count=overall_meta_count+1
+                overall_meta_count = overall_meta_count + 1
             end
             if teammate_count > 0
-                @student_overall_average[student.fullname.to_s][:teammate_review] = (teammate_aggregate/teammate_count).to_f.round() 
+                @student_overall_average[student.fullname.to_s][:teammate_review] = (teammate_aggregate/teammate_count).to_f.round().to_s+'%'
                 overall_teammate_average =  overall_teammate_average + (teammate_aggregate/teammate_count)
                 overall_teammate_count=overall_teammate_count+1
             end
         end
         #      ><b>Class Average</b><
         @assignments.each do |assignment| 
+            @meta_review[@class_average_sym][assignment.name.to_s] = ''
+            @teammate_review[@class_average_sym][assignment.name.to_s] = ''
             if meta_count_hash[assignment.name.to_s] > 0 
-                @meta_review[:class_average][assignment.name.to_s] = (meta_hash[assignment.name.to_s]/meta_count_hash[assignment.name.to_s]).to_f.round()
+                @meta_review[@class_average_sym][assignment.name.to_s] = (meta_hash[assignment.name.to_s]/meta_count_hash[assignment.name.to_s]).to_f.round().to_s + '%'
             end 
             if teammate_count_hash[assignment.name.to_s] > 0 
-                @teammate_review[:class_average][assignment.name.to_s] = (teammate_hash[assignment.name.to_s]/teammate_count_hash[assignment.name.to_s]).to_f.round()
+                @teammate_review[@class_average_sym][assignment.name.to_s] = (teammate_hash[assignment.name.to_s]/teammate_count_hash[assignment.name.to_s]).to_f.round().to_s + '%'
             end 
         end 
         if overall_meta_count > 0 
-            @class_overall_average[:class_average][:meta_review] = (overall_meta_average/overall_meta_count).to_f.round()
+            @class_overall_average[@class_average_sym][@meta_review_sym] = (overall_meta_average/overall_meta_count).to_f.round().to_s + '%'
         end 
-        if overall_teammate_count > 0 
-            @class_overall_average[:class_average][:teammate_review] = (overall_teammate_average/overall_teammate_count).to_f.round()
+        if overall_teammate_count > 0
+            @class_overall_average[@class_average_sym][@teammate_review_sym] = (overall_teammate_average/overall_teammate_count).to_f.round().to_s + '%'
         end 
-
+       
     end
 
     # Find all the assignments for a given student pertaining to the course. This data is given a graphical display using bar charts. Individual teammate and metareview scores are displayed along with their aggregate
@@ -267,12 +272,6 @@ class Assessment360Controller < ApplicationController
         @course = Course.find(params[:course_id])
         @students = @course.get_participants()
         @current_student = @students.select {|student| student.id.to_s == params[:student_id].to_s}.first
-#        @students.each { |student|
-#            if student.id.to_s == params[:student_id].to_s
-#                @current_student = student
-#                break
-#            end
-#        }
         @assignments = Assignment.where(course_id: @course.id);
 
         colors = Array.new
@@ -297,21 +296,20 @@ class Assessment360Controller < ApplicationController
                 assignment_participant = assignment.participants.find_by_user_id(@current_student.user_id)
                 if  !assignment_participant.nil?
                     teammate_scores = assignment_participant.teammate_reviews
-                    meta_scores = assignment_participant.metareviews
-                    j = 1.to_i
+                    j = 0
                     average = 0;
                     if !teammate_scores.nil?
                         teammate_scores.each do |teammate_score|
-                            average = average +   teammate_score.average_score
-                            bc.data assignment.name.to_s + ", Scores: " + teammate_score.get_average_score.to_s, [teammate_score.get_average_score], colors[i]
+                            average = average +   teammate_score.get_average_score
+                            bc.data assignment.name.to_s + ", Scores: " + teammate_score.get_average_score.to_s + '%', [teammate_score.get_average_score], colors[i]
                             j = j + 1
                         end
-                        if( (j-1).to_i > 0)
-                            average = average.to_i / (j-1).to_i
-                            bc.data assignment.name.to_s + ", Average: "+ average.to_s, [average], '000000'
+                        if j > 0
+                            average = average / j
+                            bc.data assignment.name.to_s + ", Average: "+ average.to_s + '%', [average], '000000'
                         end
                     end
-                    i = i +1
+                    i = i + 1
                 end
                 @bc= bc.to_url
             end
@@ -325,17 +323,17 @@ class Assessment360Controller < ApplicationController
                 assignment_participant = assignment.participants.find_by_user_id(@current_student.user_id)
                 if  !assignment_participant.nil?
                     meta_scores = assignment_participant.metareviews()
-                    j = 1.to_i
+                    j = 0
                     average = 0;
                     if !meta_scores.nil?
                         meta_scores.each do |meta_score|
-                            average = average +   meta_score.average_score
-                            bc.data assignment.name.to_s + ", Scores ".to_s +  meta_score.get_average_score.to_s, [meta_score.get_average_score], colors[i]
+                            average = average +   meta_score.get_average_score
+                            bc.data assignment.name.to_s + ", Scores ".to_s + meta_score.get_average_score.to_s + '%', [meta_score.get_average_score], colors[i]
                             j = j + 1
                         end
-                        if( (j-1).to_i > 0)
-                            average = average.to_i / (j-1).to_i
-                            bc.data assignment.name.to_s + ", Average: "+ average.to_s, [average], '000000'
+                        if j > 0
+                            average = average.to_i / j
+                            bc.data assignment.name.to_s + ", Average: "+ average.to_s + '%', [average], '000000'
                         end
 
                     end

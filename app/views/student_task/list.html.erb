@@ -76,6 +76,19 @@
   <span class="notification">&nbsp; &raquo; <%= link_to student_task.assignment.name + ": " +
     student_task.current_stage + " submitted", :controller => :grades, :action => :view_my_scores, :id => student_task.participant.id %></span><br/>
 <% end %>
+<br/>
+
+
+<strong>Students Teamed With You<br></strong><br>
+
+<% @students_teamed_with.keys.each do |course_id| %>
+    <strong>&nbsp;&nbsp;<span class="tasknum">&nbsp;<%= @students_teamed_with[course_id].size.to_s %>&nbsp;</span> <%= Course.find(course_id).name %><br></strong><br>
+
+    <% @students_teamed_with[course_id].each do |student|%>
+        <span class="notification">&nbsp; &raquo; <%= student.fullname.to_s %> </span><br/>
+    <% end %>
+<% end %>
+
 </div>
 </div>
 
@@ -119,3 +132,4 @@
     <% end %>
   </table>
 </div>
+

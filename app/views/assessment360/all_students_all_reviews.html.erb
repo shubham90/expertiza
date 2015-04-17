@@ -20,21 +20,21 @@
         <tr>
             <td align="center"><%= link_to student.fullname.to_s, :action => 'one_student_all_reviews' , :student_id => student.id, :course_id => @course.id  %> </td>
             <% @assignments.each do |assignment|%>
-                <td><%= puts @meta_review[student.fullname.to_s][assignment.name.to_s] %></td>
-                <td><%= puts @teammate_review[student.fullname.to_s][assignment.name.to_s] %></td>
+                <td><%= @meta_review[student.fullname.to_s][assignment.name.to_s] %></td>
+                <td><%= @teammate_review[student.fullname.to_s][assignment.name.to_s] %></td>
             <% end%>
-            <td><%= puts @student_overall_average[student.fullname.to_s][@meta_review_sym]%></td>
-            <td><%= puts @student_overall_average[student.fullname.to_s][@teammate_review_sym]%></td>
+            <td><%=  @student_overall_average[student.fullname.to_s][@meta_review_sym] %></td>
+            <td><%=  @student_overall_average[student.fullname.to_s][@teammate_review_sym] %></td>
         </tr>
     <%end%>
         <tr>
             <td><b>Class Average</b></td>
             <% @assignments.each do |assignment|%>
-                <td><%= puts @meta_review[@class_average_sym][assignment.name.to_s] %></td>
-                <td><%= puts @teammate_review[@class_average_sym][assignment.name.to_s]%></td>
+                <td><%= @meta_review[@class_average_sym][assignment.name.to_s] %></td>
+                <td><%= @teammate_review[@class_average_sym][assignment.name.to_s] %></td>
             <% end%>
-            <td><%= puts @class_overall_average[@class_average_sym][@meta_review_sym]%></td>
-            <td><%= puts @class_overall_average[@class_average_sym][@teammate_review_sym]%></td>
+            <td><%= @class_overall_average[@class_average_sym][@meta_review_sym] %></td>
+            <td><%= @class_overall_average[@class_average_sym][@teammate_review_sym] %></td>
         </tr>
     </table>
 </div>

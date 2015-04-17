@@ -14,6 +14,9 @@ class StudentTaskController < ApplicationController
     @tasknotstarted = @student_tasks.select(&:not_started?)
     @taskrevisions = @student_tasks.select(&:revision?)
     @notifications = @student_tasks.select(&:notify?)
+
+    ######## Students Teamed With###################
+    @students_teamed_with = StudentTask.teamed_students current_user
   end
 
   def view
